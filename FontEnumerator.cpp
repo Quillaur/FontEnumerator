@@ -43,13 +43,11 @@ IVector<String^>^ FontEnumerator::GetFonts()
 	{
 		IDWriteFontFamily* pFontFamily = NULL;
 
-		// Get the font family.
 		if (SUCCEEDED(hr))
 			hr = pFontCollection->GetFontFamily(i, &pFontFamily);
 
 		IDWriteLocalizedStrings* pFamilyNames = NULL;
 
-		// Get a list of localized strings for the family name.
 		if (SUCCEEDED(hr))
 			hr = pFontFamily->GetFamilyNames(&pFamilyNames);
 
@@ -60,36 +58,29 @@ IVector<String^>^ FontEnumerator::GetFonts()
 
 		if (SUCCEEDED(hr))
 		{
-			// Get the default locale for this user.
 			int defaultLocaleSuccess = GetUserDefaultLocaleName(localeName, LOCALE_NAME_MAX_LENGTH);
 
-			// If the default locale is returned, find that locale name, otherwise use "en-us".
 			if (defaultLocaleSuccess)
 				hr = pFamilyNames->FindLocaleName(localeName, &index, &exists);
 			if (SUCCEEDED(hr) && !exists) // if the above find did not find a match, retry with US English
 				hr = pFamilyNames->FindLocaleName(L"en-us", &index, &exists);
 		}
 
-		// If the specified locale doesn't exist, select the first on the list.
 		if (!exists)
 			index = 0;
 
 		UINT32 length = 0;
 
-		// Get the string length.
 		if (SUCCEEDED(hr))
 			hr = pFamilyNames->GetStringLength(index, &length);
 
-		// Allocate a string big enough to hold the name.
 		wchar_t* name = new (std::nothrow) wchar_t[length + 1];
 		if (name == NULL)
 			hr = E_OUTOFMEMORY;
 
-		// Get the family name.
 		if (SUCCEEDED(hr))
 			hr = pFamilyNames->GetString(index, name, length + 1);
 		if (SUCCEEDED(hr))
-			// Print out the family name.
 			result->Append(ref new String(name));
 
 		SafeRelease(&pFontFamily);
